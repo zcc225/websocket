@@ -9,7 +9,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>wsChat</servlet-name>
-        <url-pattern>/websocket/websocket</url-pattern>
+        <url-pattern>/websocket/DaHandler</url-pattern>
     </servlet-mapping>
   
   

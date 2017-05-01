@@ -1,10 +1,19 @@
 package com.zccpro.websocket;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.zccpro.util.DateStyle;
+import com.zccpro.util.DateUtil;
 
 /**
  * @ServerEndpoint 注解是一个类层次的注解，它的功能主要是将目前的类定义成一个websocket服务器端,
@@ -20,78 +29,150 @@ public class WebSocketTest {
 
     //与某个客户端的连接会话，需要通过它来给客户端发送数据
     private Session session;
+    
+    private boolean flag = true;
+    
+    private int[] s={4,5,7,8,10,12};
+   
 
+//    /**
+//     * 连接建立成功调用的方法
+//     * @param session  可选的参数。session为与某个客户端的连接会话，需要通过它来给客户端发送数据
+//     */
+//    @OnOpen
+//    public void onOpen(Session session){
+//        this.session = session;
+//        webSocketSet.add(this);     //加入set中
+//        addOnlineCount();           //在线数加1
+//        System.out.println("有新连接加入！当前在线人数为" + getOnlineCount());
+//    }
+    int randomNUm(){
+    	Random random = new Random();
+    	int nextInt = random.nextInt(s.length);
+    	int i = s[nextInt];
+    	return i;
+    }
+//    @OnOpen
+//  public void onOpen(Session session){
+//    	
+//      this.session = session;
+//      while(flag){
+//    	  try {
+//    		  StringBuffer sb =new StringBuffer();
+//    		  sb.append("北京:"+randomNUm()).append(",").append("山东:"+randomNUm()).append(",").append("武汉:"+randomNUm());
+//			this.session.getBasicRemote().sendText(sb.toString());
+//			System.out.println("进行中。。。");
+//			Thread.sleep(1000);
+//		} catch (IOException e) {
+//			flag = false;
+//		} catch (InterruptedException e) {
+//			System.out.println("关闭");
+//		}
+//      }
+//  }
+    
+  @OnOpen
+  public void onOpen(Session session){
+	  LinkedList<String> x = new LinkedList<String>();
+	  LinkedList<Integer> y = new LinkedList<Integer>();
+      this.session = session;
+      while(flag){
+    	  try {
+    		  x.offer(DateUtil.DateToString(new Date(), DateStyle.HH_MM_SS_EN_YYYY_MM_DD));
+    		  y.offer(randomNUm());
+    		  if(x.size()>10){
+    			x.remove(x.element());
+    			y.remove(y.element());
+    			}
+    		  String xs = StringUtils.join(x.toArray(), ",");
+    		  String ys = StringUtils.join(y.toArray(), ",");
+			this.session.getBasicRemote().sendText(xs+"|"+ys);
+			System.out.println("进行中。。。"+xs+"|"+ys);
+			Thread.sleep(1000);
+		} catch (IOException e) {
+			flag = false;
+		} catch (InterruptedException e) {
+			System.out.println("关闭");
+		}
+      }
+  }
+    
+    
     /**
-     * 连接建立成功调用的方法
-     * @param session  可选的参数。session为与某个客户端的连接会话，需要通过它来给客户端发送数据
-     */
-    @OnOpen
-    public void onOpen(Session session){
-        this.session = session;
-        webSocketSet.add(this);     //加入set中
-        addOnlineCount();           //在线数加1
-        System.out.println("有新连接加入！当前在线人数为" + getOnlineCount());
-    }
-
-    /**
-     * 连接关闭调用的方法
-     */
-    @OnClose
-    public void onClose(){
-        webSocketSet.remove(this);  //从set中删除
-        subOnlineCount();           //在线数减1
-        System.out.println("有一连接关闭！当前在线人数为" + getOnlineCount());
-    }
-
-    /**
-     * 收到客户端消息后调用的方法
-     * @param message 客户端发送过来的消息
-     * @param session 可选的参数
-     */
-    @OnMessage
-    public void onMessage(String message, Session session) {
-        System.out.println("来自客户端的消息:" + message);
-        //群发消息
-        for(WebSocketTest item: webSocketSet){
-            try {
-                item.sendMessage(message);
-            } catch (IOException e) {
-                e.printStackTrace();
-                continue;
-            }
-        }
-    }
-
-    /**
-     * 发生错误时调用
-     * @param session
-     * @param error
-     */
-    @OnError
-    public void onError(Session session, Throwable error){
-        System.out.println("发生错误");
-        error.printStackTrace();
-    }
-
-    /**
-     * 这个方法与上面几个方法不一样。没有用注解，是根据自己需要添加的方法。
-     * @param message
-     * @throws IOException
-     */
-    public void sendMessage(String message) throws IOException{
-        this.session.getBasicRemote().sendText(message);
-        //this.session.getAsyncRemote().sendText(message);
-    }
-
-    public static synchronized int getOnlineCount() {
-        return onlineCount;
-    }
-
-    public static synchronized void addOnlineCount() {
-        WebSocketTest.onlineCount++;
-    }
-
-    public static synchronized void subOnlineCount() {
-        WebSocketTest.onlineCount--;
-    }
+   * 连接关闭调用的方法
+   */
+  @OnClose
+  public void onClose(){
+	  this.flag = false;
+  }
+//
+//    /**
+//     * 连接关闭调用的方法
+//     */
+//    @OnClose
+//    public void onClose(){
+//        webSocketSet.remove(this);  //从set中删除
+//        subOnlineCount();           //在线数减1
+//        System.out.println("有一连接关闭！当前在线人数为" + getOnlineCount());
+//    }
+//
+//    /**
+//     * 收到客户端消息后调用的方法
+//     * @param message 客户端发送过来的消息
+//     * @param session 可选的参数
+//     */
+//    @OnMessage
+//    public void onMessage(String message, Session session) {
+//        System.out.println("来自客户端的消息:" + message);
+//        //群发消息
+//        for(WebSocketTest item: webSocketSet){
+//            try {
+//                item.sendMessage(message);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                continue;
+//            }
+//        }
+//    }
+//
+//    /**
+//     * 发生错误时调用
+//     * @param session
+//     * @param error
+//     */
+//    @OnError
+//    public void onError(Session session, Throwable error){
+//        System.out.println("发生错误");
+//        error.printStackTrace();
+//    }
+//
+//    /**
+//     * 这个方法与上面几个方法不一样。没有用注解，是根据自己需要添加的方法。
+//     * @param message
+//     * @throws IOException
+//     */
+//    public void sendMessage(String message) throws IOException{
+//    	for (int i = 0; i < 1000000; i++) {
+//			try {
+//				Thread.sleep(1000);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			this.session.getBasicRemote().sendText("msg:"+i);
+//		}
+//        //this.session.getAsyncRemote().sendText(message);
+//    }
+//
+//    public static synchronized int getOnlineCount() {
+//        return onlineCount;
+//    }
+//
+//    public static synchronized void addOnlineCount() {
+//        WebSocketTest.onlineCount++;
+//    }
+//
+//    public static synchronized void subOnlineCount() {
+//        WebSocketTest.onlineCount--;
+//    }
 }

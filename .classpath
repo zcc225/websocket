@@ -35,5 +35,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="F:/技术总结/websocket/websocket-api.jar"/>
 	<classpathentry kind="lib" path="G:/tools/apache-tomcat-7.0.57/lib/catalina.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
